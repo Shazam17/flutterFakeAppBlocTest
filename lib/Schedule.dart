@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+
 class Lesson {
-  String date;
+  //String date;
   String name;
 }
 
@@ -18,4 +20,12 @@ class Schedule {
 Schedule fileToSchedule(String file){
   var schedule = Schedule();
 
+  var lessons = file.split("BEGIN:VEVENT");
+  lessons.removeAt(0);
+  lessons.forEach((String lesson){
+    var props = lesson.split("\n");
+    debugPrint(props[4]);
+  });
+
+return schedule;
 }
