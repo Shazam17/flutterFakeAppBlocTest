@@ -1,95 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'dart:async';
+import 'dart:io';
+import 'Schedule.dart';
+
 
 void main() => runApp(App());
 
-
-class App extends StatelessWidget{
+class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Flutter App",
-      home: BlocProvider<BlocWeather>(
-        builder: (context) => BlocWeather(),
-            child: RandomWeather(),
-      ),
+      home: Scheduler(),
     );
   }
 
 }
 
-abstract class WeatherEvent{
 
-
-}
-
-class Generate extends WeatherEvent{
-  final String name;
-  Generate({this.name});
-}
-class WeatherState {
-  final String cityName;
-  final int degrees;
-  WeatherState({this.cityName,this.degrees});
-}
-class BlocWeather extends Bloc<WeatherEvent,WeatherState>{
-
+class Scheduler extends StatefulWidget {
   @override
-  WeatherState get initialState => WeatherState('',0);
-
-  @override
-  Stream<WeatherState> mapEventToState(WeatherEvent event) async* {
-      if(event is Generate){
-        yield WeatherState(event.name,-123123);
-      }
-  }
-
-}
-
-class RandomWeather extends StatefulWidget {
-  @override
-  RandomWeatherState createState() {
-    return RandomWeatherState();
+  ScheduleState createState() {
+    return ScheduleState();
   }
 }
 
-class RandomWeatherState extends State<RandomWeather> {
-  var text = '';
+class ScheduleState extends State<Scheduler> {
+  Schedule scheduler;
 
   @override
   Widget build(BuildContext context) {
-    final BlocWeather bloc = BlocProvider.of<BlocWeather>(context);
     return Scaffold(
-          body: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          TextField(
-            decoration: InputDecoration(
-                hintText: 'Enter cityName'),
-            onChanged: (txt){
-              text = txt;
-            },
-          ),
-          FlatButton(
-            child: Text("button"),
-            onPressed: (){
-              bloc.add(Generate(text));
-            },
-          ),
-          BlocBuilder<BlocWeather,WeatherState>(
-            builder: (context,weather){
-              return Column(
-                children: <Widget>[
-                  Text("city is ${weather.cityName}"),
-                  Text("The weather is ${weather.degrees}")
-                ],
-              );
-            },
-          )
-        ],
-      )
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            FlatButton(
+              child: Text("fetch"),
+              onPressed: () async {
+                var fetchedFile = await DefaultCacheManager()
+                    .getSingleFile(
+                    "https://timetable.tusur.ru/faculties/fsu/groups/428-2.ics");
+                    fetchedFile.readAsString().then((String content)
+                {
+                    scheduler = fileToSchedule(content);
+                });
+              },
+            )
+          ],
+        )
     );
   }
 }
+
