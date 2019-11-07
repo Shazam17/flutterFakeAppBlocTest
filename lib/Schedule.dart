@@ -49,7 +49,7 @@ Schedule fileToSchedule(String file){
   int count = 0;
   var lessons = file.split("BEGIN:VEVENT");
   lessons.removeAt(0);
-  lessons.forEach((String lesson){
+  lessons.forEach((lesson){
     var props = lesson.split("\n");
     
     var date = props[2].substring(46 ,60);
@@ -63,7 +63,17 @@ Schedule fileToSchedule(String file){
     dataList.add(date.substring(11,13));
 
 
-    schedule.addLesson(0, Lesson(props[4].split(":")[1],dataList));
+    for(int i = 0 ;i < 7;i++){
+      var day = (DateTime.now().day + i).toString();
+      if (day.length == 1){
+        day = "0$day";
+      }
+      if(dataList[0] == DateTime.now().month.toString() &&
+          dataList[1] == day){
+        schedule.addLesson(i, Lesson(props[4].split(":")[1],dataList));
+      }
+    }
+
       //schedule.lessons
       //schedule.lessons.sort((a ,b) => b.data[now.weekday][3].compareTo(a.data[now.weekday][3]));
 

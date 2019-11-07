@@ -44,8 +44,7 @@ class ScheduleState extends State<Scheduler> {
     fetchedFile.readAsString().then((String content)
     {
       schedule = fileToSchedule(content);
-      debugPrint(schedule.getLessonsOfDay().toString());
-       setState(() {
+      setState(() {
         loaded = false;
       });
     });
@@ -68,16 +67,23 @@ class ScheduleState extends State<Scheduler> {
           ],
         ),
         body: Center(
-              child: loaded ? CircularProgressIndicator() : ListView.builder(
-                  itemCount: schedule != null ? schedule.getLessonsOfDay().length : 0 ,
-                  itemBuilder: (BuildContext context,int index){
-                    return Container(
-                      height: 50,
-                      child: Text("${ schedule.getLessonsOfDay()[index].name}")
-                    );
-                  })
+              child: loaded ? CircularProgressIndicator() : PageView.builder(
+                  itemBuilder: (context,position){
+                    return listView(position);
+                  },
+                  itemCount: schedule!= null ?  schedule.lessons.length : 0 ,)
             )
     );
+  }
+  listView(int i){
+    return ListView.builder(
+        itemCount: schedule != null ? schedule.lessons[i].length : 0 ,
+        itemBuilder: (BuildContext context,int index){
+          return Container(
+              height: 50,
+              child: Text("${ schedule.lessons[i][index].name}")
+          );
+        });
   }
 }
 
