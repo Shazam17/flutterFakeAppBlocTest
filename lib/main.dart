@@ -30,28 +30,53 @@ class Scheduler extends StatefulWidget {
 }
 
 class ScheduleState extends State<Scheduler> {
-  Schedule scheduler;
+  Schedule schedule;
+  var loaded = true;
+
+  ScheduleState(){
+    fetchSchedule();
+  }
+
+  void fetchSchedule() async{
+    var fetchedFile = await DefaultCacheManager()
+        .getSingleFile(
+        "https://timetable.tusur.ru/faculties/fsu/groups/428-2.ics");
+    fetchedFile.readAsString().then((String content)
+    {
+      schedule = fileToSchedule(content);
+      debugPrint(schedule.getLessonsOfDay().toString());
+       setState(() {
+        loaded = false;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            FlatButton(
-              child: Text("fetch"),
-              onPressed: () async {
-                var fetchedFile = await DefaultCacheManager()
-                    .getSingleFile(
-                    "https://timetable.tusur.ru/faculties/fsu/groups/428-2.ics");
-                    fetchedFile.readAsString().then((String content)
-                {
-                    scheduler = fileToSchedule(content);
-                });
-              },
-            )
+        appBar: new AppBar(
+          title: new Text("realy cool app"),
+          actions: <Widget>[
+            new IconButton(icon: new Icon(Icons.refresh), onPressed: (){
+              print("Reloading");
+              setState(() {
+                loaded = true;
+              });
+              fetchSchedule();
+            })
           ],
-        )
+        ),
+        body: Center(
+              child: loaded ? CircularProgressIndicator() : ListView.builder(
+                  itemCount: schedule != null ? schedule.getLessonsOfDay().length : 0 ,
+                  itemBuilder: (BuildContext context,int index){
+                    return Container(
+                      height: 50,
+                      child: Text("${ schedule.getLessonsOfDay()[index].name}")
+                    );
+                  })
+            )
     );
   }
 }
